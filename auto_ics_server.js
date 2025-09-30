@@ -1,12 +1,57 @@
-// Run with: node auto_ics_server.js
+// auto_ics_server.js
 const http = require("http");
 const url = require("url");
 
-let events = [
-  { title: "Weekly Workout", description: "Reminder to complete your weekly workout plan.", start: "20251006T180000", end: "20251006T190000" },
-  { title: "Meal Plan Day 3", description: "Breakfast, lunch, dinner", start: "20251008T070000", end: "20251008T190000" }
-];
+// Generate dates for next week (Monday to Friday)
+function getNextWeekDates() {
+  const today = new Date();
+  const dates = [];
+  for (let i = 1; i <= 7; i++) { // next 7 days
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
 
+let events = [];
+const dates = getNextWeekDates();
+
+// Monday to Friday workouts 6:00 PM - 7:00 PM
+dates.forEach(date => {
+  const day = date.getDay(); // 1=Monday, 5=Friday
+  if(day >= 1 && day <= 5){
+    const start = new Date(date);
+    start.setHours(18,0,0);
+    const end = new Date(date);
+    end.setHours(19,0,0);
+
+    const formatICS = d => d.toISOString().replace(/[-:]/g,'').split('.')[0];
+    events.push({
+      title: "Workout",
+      description: "Evening workout session",
+      start: formatICS(start),
+      end: formatICS(end)
+    });
+  }
+});
+
+// Daily meals 7:00 AM - 7:30 PM
+dates.forEach(date => {
+  const start = new Date(date);
+  start.setHours(7,0,0);
+  const end = new Date(date);
+  end.setHours(19,30,0);
+  const formatICS = d => d.toISOString().replace(/[-:]/g,'').split('.')[0];
+  events.push({
+    title: "Meal Plan",
+    description: "Daily meals: breakfast, lunch, dinner",
+    start: formatICS(start),
+    end: formatICS(end)
+  });
+});
+
+// Generate ICS text
 function generateICS() {
   let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\n";
   events.forEach(ev => {
