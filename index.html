@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive Calendar Manager</title>
+<style>
+  body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1f1f1f, #2c2c54); color: #fff; margin:0; padding:0;}
+  header { background: linear-gradient(90deg,#ff6b6b,#feca57); padding:25px; text-align:center; font-size:2rem; font-weight:bold; color:#fff; text-shadow:1px 1px 4px rgba(0,0,0,0.5);}
+  .container { max-width:1000px; margin:20px auto; padding:20px;}
+  form { background:#2e2e3a; padding:20px; border-radius:15px; margin-bottom:25px; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation:slideDown 0.5s ease-out;}
+  form input, form textarea { width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:none; outline:none; transition:all 0.3s ease;}
+  form input:focus, form textarea:focus { transform: scale(1.02); box-shadow:0 0 10px #ff6b6b;}
+  form button { background: linear-gradient(90deg,#ff6b6b,#feca57); border:none; padding:12px 20px; border-radius:12px; cursor:pointer; color:#fff; font-weight:bold; transition:all 0.3s ease;}
+  form button:hover { transform: scale(1.05); box-shadow:0 0 15px #feca57;}
+  .event { background: linear-gradient(135deg,#4b79a1,#283e51); margin:12px 0; padding:18px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s ease; cursor:pointer; animation:fadeIn 0.5s ease forwards;}
+  .event:hover { transform: scale(1.03) rotate(-1deg); box-shadow:0 8px 20px rgba(0,0,0,0.5); background:linear-gradient(135deg,#ff6b6b,#feca57); color:#1f1f1f;}
+  .event div { max-width:80%; }
+  .event button { background:#ff4757; padding:8px 14px; border-radius:10px;}
+  .event button:hover { background:#ff6b81; transform:scale(1.1);}
+  #downloadICS { background:linear-gradient(90deg,#1dd1a1,#10ac84); border:none; padding:15px 25px; font-size:1rem; border-radius:15px; cursor:pointer; margin-top:20px; transition:all 0.3s ease; width:100%;}
+  #downloadICS:hover { transform:scale(1.05); box-shadow:0 0 15px #1dd1a1;}
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px);} to { opacity:1; transform:translateY(0);} }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-20px);} to { opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<header>Interactive Calendar Manager</header>
+<div class="container">
+  <form id="addEventForm">
+    <input type="text" id="eventTitle" placeholder="Event Title" required />
+    <input type="datetime-local" id="eventStart" required />
+    <input type="datetime-local" id="eventEnd" required />
+    <textarea id="eventDescription" placeholder="Event Description"></textarea>
+    <button type="submit">Add Event</button>
+  </form>
+
+  <div id="eventsList"></div>
+  <button id="downloadICS">Download ICS</button>
+</div>
+
+<script>
+let events = [];
+
+const exampleICS = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Weekly Workout
+DTSTART:20251006T180000
+DTEND:20251006T190000
+DESCRIPTION:Reminder to complete your weekly workout plan.
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Meal Plan Day 3
+DTSTART:20251008T070000
+DTEND:20251008T190000
+DESCRIPTION:Example meal plan entry for Day 3. Breakfast, snacks, lunch, dinner.
+END:VEVENT
+END:VCALENDAR`;
+
+function parseICS(ics) {
+  const lines = ics.split(/\r?\n/);
+  let currentEvent = null;
+  lines.forEach(line => {
+    if(line.startsWith("BEGIN:VEVENT")) currentEvent = {};
+    else if(line.startsWith("END:VEVENT")) {
+      // Convert start/end to Date objects
+      currentEvent.startDate = parseICSTime(currentEvent.start);
+      currentEvent.endDate = parseICSTime(currentEvent.end);
+      events.push(currentEvent);
+      currentEvent = null;
+    } else if(currentEvent) {
+      if(line.startsWith("SUMMARY:")) currentEvent.title = line.replace("SUMMARY:", "");
+      if(line.startsWith("DESCRIPTION:")) currentEvent.description = line.replace("DESCRIPTION:", "");
+      if(line.startsWith("DTSTART:")) currentEvent.start = line.replace("DTSTART:", "");
+      if(line.startsWith("DTEND:")) currentEvent.end = line.replace("DTEND:", "");
+    }
+  });
+}
+
+// Converts ICS datetime string to JS Date object
+function parseICSTime(icsTime) {
+  const y = parseInt(icsTime.substr(0,4));
+  const m = parseInt(icsTime.substr(4,2))-1;
+  const d = parseInt(icsTime.substr(6,2));
+  const h = parseInt(icsTime.substr(9,2));
+  const min = parseInt(icsTime.substr(11,2));
+  return new Date(y,m,d,h,min);
+}
+
+function formatReadable(date) {
+  return date.toLocaleString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true });
+}
+
+parseICS(exampleICS);
+
+const eventsList = document.getElementById("eventsList");
+
+function renderEvents() {
+  eventsList.innerHTML = "";
+  events.forEach((ev,index)=>{
+    const div = document.createElement("div");
+    div.className="event";
+    div.innerHTML = `<div>
+      <strong>${ev.title}</strong><br>
+      ${formatReadable(ev.startDate)} - ${formatReadable(ev.endDate)}<br>
+      ${ev.description}
+    </div>
+    <button onclick="removeEvent(${index})">Remove</button>`;
+    eventsList.appendChild(div);
+  });
+}
+
+function removeEvent(index){
+  events.splice(index,1);
+  renderEvents();
+}
+
+document.getElementById("addEventForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const newEvent = {
+    title: document.getElementById("eventTitle").value,
+    start: document.getElementById("eventStart").value.replace(/[-:]/g,'').replace('T',''),
+    end: document.getElementById("eventEnd").value.replace(/[-:]/g,'').replace('T',''),
+    description: document.getElementById("eventDescription").value,
+    startDate: new Date(document.getElementById("eventStart").value),
+    endDate: new Date(document.getElementById("eventEnd").value)
+  };
+  events.push(newEvent);
+  renderEvents();
+  e.target.reset();
+});
+
+function generateICS(){
+  let ics = "BEGIN:VCALENDAR\nVERSION:2.0\n";
+  events.forEach(ev=>{
+    ics += "BEGIN:VEVENT\n";
+    ics += `SUMMARY:${ev.title}\n`;
+    ics += `DESCRIPTION:${ev.description}\n`;
+    ics += `DTSTART:${ev.start}\n`;
+    ics += `DTEND:${ev.end}\n`;
+    ics += "END:VEVENT\n";
+  });
+  ics += "END:VCALENDAR";
+  return ics;
+}
+
+document.getElementById("downloadICS").addEventListener("click",()=>{
+  const blob = new Blob([generateICS()],{type:'text/calendar'});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download="calendar.ics";
+  a.click();
+});
+
+renderEvents();
+</script>
+</body>
+</html>
