@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Interactive Calendar Manager</title>
+<title>Xclipse Networks Calendar</title>
 <style>
 body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1f1f1f, #2c2c54); color: #fff; margin:0; padding:0;}
 header { background: linear-gradient(90deg,#ff6b6b,#feca57); padding:25px; text-align:center; font-size:2rem; font-weight:bold; color:#fff; text-shadow:1px 1px 4px rgba(0,0,0,0.5);}
@@ -25,7 +25,7 @@ form button:hover { transform: scale(1.05); box-shadow:0 0 15px #feca57;}
 </style>
 </head>
 <body>
-<header>Interactive Calendar Manager</header>
+<header>Xclipse Networks Calendar</header>
 <div class="container">
   <form id="addEventForm">
     <input type="text" id="eventTitle" placeholder="Event Title" required />
@@ -41,27 +41,9 @@ form button:hover { transform: scale(1.05); box-shadow:0 0 15px #feca57;}
 
 <script>
 const events = [];
-const today = new Date();
 
-function addDays(date, days){ const d = new Date(date); d.setDate(d.getDate()+days); return d; }
 function formatICSDate(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]; }
 function formatReadable(d){ return d.toLocaleString('en-US',{ weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true }); }
-
-// Generate next 7 days
-for(let i=1;i<=7;i++){
-  const d = addDays(today,i);
-  const day = d.getDay();
-  // Workouts Monday–Friday
-  if(day>=1 && day<=5){
-    const start = new Date(d); start.setHours(18,0,0);
-    const end = new Date(d); end.setHours(19,0,0);
-    events.push({ title:"Workout", description:"Evening workout session", startDate:start, endDate:end, start:formatICSDate(start), end:formatICSDate(end) });
-  }
-  // Daily meals
-  const mealStart = new Date(d); mealStart.setHours(7,0,0);
-  const mealEnd = new Date(d); mealEnd.setHours(19,30,0);
-  events.push({ title:"Meal Plan", description:"Daily meals: breakfast, lunch, dinner", startDate:mealStart, endDate:mealEnd, start:formatICSDate(mealStart), end:formatICSDate(mealEnd) });
-}
 
 // Add the Xclipse Networks Website Deployment Event
 const deployDate = new Date('2025-12-15T00:00:00Z');
@@ -130,7 +112,7 @@ document.getElementById("downloadICS").addEventListener("click",()=>{
   const blob=new Blob([generateICS()],{type:'text/calendar'});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download="calendar.ics";
+  a.download="xclipse_networks_calendar.ics";
   a.click();
 });
 
