@@ -24,4 +24,14 @@ DTEND;TZID=UTC:20251008T190000
 SUMMARY:Meal Plan (Day 3)
 DESCRIPTION:Example meal plan entry for Day 3. Breakfast, snacks, lunch, dinner.
 END:VEVENT
+BEGIN:VEVENT
+UID:deployment-20251215@xclipsenetworks
+DTSTAMP:20251111T000000Z
+DTSTART;VALUE=DATE:20251215
+DTEND;VALUE=DATE:20251216
+SUMMARY:Xclipse Networks Website Deployment
+DESCRIPTION:Launch day for the Xclipse Networks website.
+STATUS:CONFIRMED
+CATEGORIES:Deployment
+END:VEVENT
 END:VCALENDAR
