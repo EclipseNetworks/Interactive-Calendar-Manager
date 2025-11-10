@@ -8,20 +8,18 @@
 body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1f1f1f, #2c2c54); color: #fff; margin:0; padding:0;}
 header { background: linear-gradient(90deg,#ff6b6b,#feca57); padding:25px; text-align:center; font-size:2rem; font-weight:bold; color:#fff; text-shadow:1px 1px 4px rgba(0,0,0,0.5);}
 .container { max-width:1000px; margin:20px auto; padding:20px;}
-form { background:#2e2e3a; padding:20px; border-radius:15px; margin-bottom:25px; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation:slideDown 0.5s ease-out;}
+form { background:#2e2e3a; padding:20px; border-radius:15px; margin-bottom:25px; box-shadow:0 4px 15px rgba(0,0,0,0.4);}
 form input, form textarea { width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:none; outline:none; transition:all 0.3s ease;}
 form input:focus, form textarea:focus { transform: scale(1.02); box-shadow:0 0 10px #ff6b6b;}
 form button { background: linear-gradient(90deg,#ff6b6b,#feca57); border:none; padding:12px 20px; border-radius:12px; cursor:pointer; color:#fff; font-weight:bold; transition:all 0.3s ease;}
 form button:hover { transform: scale(1.05); box-shadow:0 0 15px #feca57;}
-.event { background: linear-gradient(135deg,#4b79a1,#283e51); margin:12px 0; padding:18px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s ease; cursor:pointer; animation:fadeIn 0.5s ease forwards;}
+.event { background: linear-gradient(135deg,#4b79a1,#283e51); margin:12px 0; padding:18px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s ease; cursor:pointer;}
 .event:hover { transform: scale(1.03) rotate(-1deg); box-shadow:0 8px 20px rgba(0,0,0,0.5); background:linear-gradient(135deg,#ff6b6b,#feca57); color:#1f1f1f;}
 .event div { max-width:80%; }
-.event button { background:#ff4757; padding:8px 14px; border-radius:10px;}
+.event button { background:#ff4757; padding:8px 14px; border-radius:10px; border:none; color:#fff; cursor:pointer; transition:0.3s;}
 .event button:hover { background:#ff6b81; transform:scale(1.1);}
 #downloadICS { background:linear-gradient(90deg,#1dd1a1,#10ac84); border:none; padding:15px 25px; font-size:1rem; border-radius:15px; cursor:pointer; margin-top:20px; transition:all 0.3s ease; width:100%;}
 #downloadICS:hover { transform:scale(1.05); box-shadow:0 0 15px #1dd1a1;}
-@keyframes fadeIn { from { opacity:0; transform:translateY(20px);} to { opacity:1; transform:translateY(0);} }
-@keyframes slideDown { from { opacity:0; transform:translateY(-20px);} to { opacity:1; transform:translateY(0);} }
 </style>
 </head>
 <body>
@@ -40,25 +38,44 @@ form button:hover { transform: scale(1.05); box-shadow:0 0 15px #feca57;}
 </div>
 
 <script>
-const events = [];
+let events = [];
 
+// Helpers
 function formatICSDate(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]; }
 function formatReadable(d){ return d.toLocaleString('en-US',{ weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true }); }
 
-// Add the Xclipse Networks Website Deployment Event
-const deployDate = new Date('2025-12-15T00:00:00Z');
-const deployEnd = new Date('2025-12-16T00:00:00Z');
-events.push({
-  title: "Xclipse Networks Website Deployment",
-  description: "Launch day for the Xclipse Networks website.",
-  startDate: deployDate,
-  endDate: deployEnd,
-  start: formatICSDate(deployDate),
-  end: formatICSDate(deployEnd)
-});
+// Load from localStorage
+function loadEvents(){
+  const saved = localStorage.getItem('xclipse_calendar_events');
+  if(saved){
+    events = JSON.parse(saved).map(ev => ({
+      ...ev,
+      startDate: new Date(ev.startDate),
+      endDate: new Date(ev.endDate)
+    }));
+  } else {
+    // Default initial event
+    const deployDate = new Date('2025-12-15T00:00:00Z');
+    const deployEnd = new Date('2025-12-16T00:00:00Z');
+    events.push({
+      title: "Xclipse Networks Website Deployment",
+      description: "Launch day for the Xclipse Networks website.",
+      startDate: deployDate,
+      endDate: deployEnd,
+      start: formatICSDate(deployDate),
+      end: formatICSDate(deployEnd)
+    });
+    saveEvents();
+  }
+}
 
+// Save to localStorage
+function saveEvents(){
+  localStorage.setItem('xclipse_calendar_events', JSON.stringify(events));
+}
+
+// Render UI
 const eventsList = document.getElementById("eventsList");
-
 function renderEvents(){
   eventsList.innerHTML="";
   events.forEach((ev,index)=>{
@@ -72,13 +89,16 @@ function renderEvents(){
     <button onclick="removeEvent(${index})">Remove</button>`;
     eventsList.appendChild(div);
   });
+  saveEvents();
 }
 
+// Remove event
 function removeEvent(index){
   events.splice(index,1);
   renderEvents();
 }
 
+// Add event
 document.getElementById("addEventForm").addEventListener("submit",e=>{
   e.preventDefault();
   const newEvent = {
@@ -94,20 +114,23 @@ document.getElementById("addEventForm").addEventListener("submit",e=>{
   e.target.reset();
 });
 
+// Generate .ics
 function generateICS(){
-  let ics="BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\n";
+  let ics="BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nPRODID:-//Xclipse Networks//Calendar//EN\n";
   events.forEach(ev=>{
     ics+="BEGIN:VEVENT\n";
     ics+=`SUMMARY:${ev.title}\n`;
     ics+=`DESCRIPTION:${ev.description}\n`;
-    ics+=`DTSTART:${ev.start}\n`;
-    ics+=`DTEND:${ev.end}\n`;
+    ics+=`DTSTART:${formatICSDate(ev.startDate)}\n`;
+    ics+=`DTEND:${formatICSDate(ev.endDate)}\n`;
+    ics+="STATUS:CONFIRMED\n";
     ics+="END:VEVENT\n";
   });
   ics+="END:VCALENDAR";
   return ics;
 }
 
+// Download ICS
 document.getElementById("downloadICS").addEventListener("click",()=>{
   const blob=new Blob([generateICS()],{type:'text/calendar'});
   const a=document.createElement("a");
@@ -116,6 +139,8 @@ document.getElementById("downloadICS").addEventListener("click",()=>{
   a.click();
 });
 
+// Initialize
+loadEvents();
 renderEvents();
 </script>
 </body>
