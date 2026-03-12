@@ -3,10 +3,10 @@ PRODID:-//Example.com//Calendar Subscription Example//EN
 VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:Xclipse Networks Calendar
+X-WR-CALNAME:Automated Calendar
 X-WR-TIMEZONE:UTC
 X-PUBLISHED-TTL:PT1H
-URL:https://example.com/cal.ics
+URL:calendar.xclipsenetworks.com/calendar.ics
 BEGIN:VEVENT
 UID:deployment-20251215@xclipsenetworks
 DTSTAMP:20251111T000000Z
