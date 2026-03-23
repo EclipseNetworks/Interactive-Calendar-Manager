@@ -3,115 +3,85 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>XCLIPSE_PIPELINE // SECURE_UPLINK</title>
+    <title>XCLIPSE | PIPELINE_C2_UPLINK</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=JetBrains+Mono:wght@200;400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
     <style>
         :root {
-            --accent1: #ff6b6b; --accent2: #feca57; --success: #1dd1a1;
-            --bg-deep: #0a0a0f; --glass: rgba(255, 255, 255, 0.03);
-            --border-glow: rgba(255, 107, 107, 0.3);
+            --accent1: #ec4899; --accent2: #8b5cf6; --success: #4ade80;
+            --bg-deep: #010206; --glass: rgba(255, 255, 255, 0.02);
         }
-
         body {
             background: var(--bg-deep); color: #fff; margin: 0; padding: 0;
             font-family: 'Poppins', sans-serif; overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(254, 202, 87, 0.05) 0%, transparent 50%);
         }
-
-        /* HEAVY HEADER ANIMATION */
         header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 60px 20px; text-align: center; border-bottom: 1px solid var(--border-glow);
-            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #010206 0%, #0f172a 100%);
+            padding: 50px 20px; text-align: center; border-bottom: 1px solid rgba(236, 72, 153, 0.2);
         }
         header h1 {
-            font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -2px;
-            background: linear-gradient(90deg, var(--accent1), var(--accent2));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(255, 107, 107, 0.4));
+            font-size: 2.5rem; font-weight: 900; margin: 0; letter-spacing: -1px;
+            color: white; text-transform: uppercase;
         }
-
-        .container { max-width: 1200px; margin: -40px auto 100px; padding: 0 20px; display: grid; grid-template-columns: 400px 1fr; gap: 30px; }
-
-        /* SUFFOCATED SIDEBAR */
-        .sidebar { position: sticky; top: 30px; height: fit-content; }
+        .pink-glow { color: var(--accent1); text-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+        
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 380px 1fr; gap: 30px; }
         
         .glass-panel {
-            background: var(--glass); backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px;
-            padding: 35px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* STATUS MONITOR */
         .monitor {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
-            background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px;
-            margin-bottom: 25px; border-left: 3px solid var(--success);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px;
+            margin-bottom: 25px; border-left: 3px solid var(--accent1); color: #888;
         }
 
-        /* FORM STYLING */
-        .field-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; opacity: 0.6; }
         input, textarea {
             width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px; padding: 15px; color: white; margin-bottom: 20px;
-            font-family: 'Poppins', sans-serif; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 10px; padding: 15px; color: white; margin-bottom: 15px;
+            font-family: 'JetBrains Mono', monospace; outline: none;
         }
-        input:focus { outline: none; border-color: var(--accent1); background: rgba(255,255,255,0.1); transform: scale(1.02); }
+        input:focus { border-color: var(--accent1); }
 
         .btn-sync {
-            background: linear-gradient(45deg, var(--accent1), var(--accent2));
-            width: 100%; padding: 20px; border: none; border-radius: 15px;
-            color: #fff; font-weight: 900; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s; letter-spacing: 2px;
+            background: var(--accent1); width: 100%; padding: 18px; border: none; 
+            border-radius: 10px; color: #fff; font-weight: 900; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s; letter-spacing: 2px; font-size: 11px;
         }
-        .btn-sync:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4); }
+        .btn-sync:hover { filter: brightness(1.2); transform: translateY(-2px); }
 
-        /* EVENT LISTING */
-        .pipeline-feed { display: flex; flex-direction: column; gap: 20px; }
         .event-node {
-            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
-            padding: 30px; border-radius: 25px; display: flex; justify-content: space-between;
-            align-items: center; position: relative; transition: 0.3s;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            padding: 25px; border-radius: 15px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .event-node:hover { background: rgba(255,255,255,0.05); border-color: var(--accent2); }
-        .event-node::before {
-            content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 4px;
-            background: var(--accent1); border-radius: 0 4px 4px 0;
-        }
-
-        .meta h3 { margin: 0; font-size: 1.4rem; letter-spacing: -1px; }
-        .meta p { margin: 5px 0; opacity: 0.5; font-size: 0.85rem; }
-        .time-badge { 
-            display: inline-block; padding: 4px 12px; border-radius: 50px;
-            background: rgba(29, 209, 161, 0.1); color: var(--success);
-            font-weight: 700; font-size: 0.7rem; margin-top: 10px;
-        }
-
+        .meta h3 { margin: 0; font-size: 1.1rem; color: var(--accent1); }
+        .meta p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.5; }
+        
         .btn-del {
-            background: none; border: 1px solid rgba(255, 107, 107, 0.3);
-            color: var(--accent1); padding: 10px 20px; border-radius: 10px;
-            cursor: pointer; font-size: 0.7rem; font-weight: 700;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444;
+            color: #ef4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 10px;
         }
 
-        /* SUBSCRIPTION INFO */
         .sub-link {
-            grid-column: span 2; background: rgba(0,0,0,0.2); padding: 20px;
-            border-radius: 15px; border: 1px dashed rgba(255,255,255,0.1);
-            text-align: center; font-family: 'JetBrains Mono'; font-size: 0.75rem; color: var(--accent2);
+            grid-column: span 2; background: rgba(0,0,0,0.3); padding: 15px;
+            border-radius: 10px; text-align: center; font-size: 10px; font-family: 'JetBrains Mono';
+            border: 1px solid rgba(255,255,255,0.05); color: #555;
         }
-
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .syncing i { animation: spin 1s infinite linear; }
     </style>
 </head>
 <body>
 
 <header>
-    <p style="font-size: 0.7rem; font-weight: 700; opacity: 0.4; letter-spacing: 5px; margin-bottom: 10px;">XCLIPSE_SYSTEMS_MANAGEMENT</p>
-    <h1>PIPELINE_C2</h1>
+    <h1>XCLIPSE <span class="pink-glow">PIPELINE</span></h1>
+    <p style="font-size: 9px; opacity: 0.4; letter-spacing: 4px; margin-top: 10px;">C2_INTEGRATED_NETWORK_V4.7</p>
 </header>
 
 <div class="container">
@@ -119,31 +89,18 @@
         <div class="glass-panel">
             <div class="monitor" id="sys-monitor">
                 [SYSTEM]: KERNEL_IDLE<br>
-                [UPLINK]: READY_FOR_STREAM<br>
-                [TOKEN]: GHP_ENCRYPTED_AUTH
+                [UPLINK]: READY_TO_BROADCAST<br>
+                [DATABASE]: CONNECTED_TO_SECURITY_NODE
             </div>
 
             <form id="eventForm">
-                <span class="field-label">Sequence Title</span>
-                <input type="text" id="evTitle" placeholder="NODE_ALPHA_01" required>
-
+                <input type="text" id="evTitle" placeholder="NODE_TITLE" required>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <span class="field-label">Initiation</span>
-                        <input type="datetime-local" id="evStart" required>
-                    </div>
-                    <div>
-                        <span class="field-label">Termination</span>
-                        <input type="datetime-local" id="evEnd" required>
-                    </div>
+                    <input type="datetime-local" id="evStart" required>
+                    <input type="datetime-local" id="evEnd" required>
                 </div>
-
-                <span class="field-label">Protocol Details</span>
-                <textarea id="evDesc" placeholder="Intersystem node synchronization parameters..."></textarea>
-
-                <button type="submit" id="syncBtn" class="btn-sync">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i> Execute Push
-                </button>
+                <textarea id="evDesc" placeholder="NODE_SPECIFICATIONS..." rows="4"></textarea>
+                <button type="submit" id="syncBtn" class="btn-sync">Execute Master Push</button>
             </form>
         </div>
     </div>
@@ -152,134 +109,122 @@
         </div>
 
     <div class="sub-link">
-        <i class="fas fa-rss mr-2"></i> APPLE_CALENDAR_FEED: 
-        <span style="opacity: 0.6;">https://raw.githubusercontent.com/eclipsenetworks/Interactive-Calendar-Manager/main/calendar.ics</span>
+        SUBSCRIPTION_URL: https://raw.githubusercontent.com/eclipsenetworks/Interactive-Calendar-Manager/main/calendar.ics
     </div>
 </div>
 
 <script>
-    // CORE CRYPTOGRAPHIC AND UPLINK CONFIGURATION
-    const KERNEL_CFG = {
-        key: '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',
-        user: 'eclipsenetworks',
-        repo: 'Interactive-Calendar-Manager',
-        file: 'calendar.ics'
+    // 1. DATA SOURCE COORDINATION (Using Admin-C2 Credentials)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCdv6yESBrKhlEvU2URCXoVRVO-2OjAEv4",
+        authDomain: "xclipse-security.firebaseapp.com",
+        databaseURL: "https://xclipse-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "xclipse-security",
+        storageBucket: "xclipse-security.firebasestorage.app",
+        messagingSenderId: "161353959200",
+        appId: "1:161353959200:web:d0b36f7817b31842cff945"
     };
 
-    let eventStorage = JSON.parse(localStorage.getItem('xclipse_vault_v2') || '[]');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const GITHUB_CFG = {
+        token: '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',
+        owner: 'eclipsenetworks',
+        repo: 'Interactive-Calendar-Manager',
+        path: 'calendar.ics'
+    };
+
+    let eventVault = [];
+
+    // 2. REAL-TIME MULTI-ADMIN LISTENER
+    db.ref('network/pipeline_events').on('value', (snapshot) => {
+        const data = snapshot.val();
+        eventVault = data ? Object.values(data) : [];
+        renderPipeline();
+    });
 
     const timestampICS = (d) => new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
 
-    /**
-     * MULTI-STAGE GITHUB UPLINK HANDSHAKE
-     * Handles the binary stream update for the Apple Calendar Subscriber.
-     */
-    async function binaryStreamUplink() {
+    // 3. THE TRIPLE-SYNC HANDSHAKE
+    async function executeGlobalSync() {
         const mon = document.getElementById('sys-monitor');
-        const btn = document.getElementById('syncBtn');
-        
-        mon.innerHTML = `[SYSTEM]: INITIATING_STREAM...<br>[NET]: RESOLVING_SHA_HANDSHAKE`;
-        btn.classList.add('syncing');
-        btn.disabled = true;
-
-        // 1. GENERATE ICS BINARY PAYLOAD
-        let stream = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Xclipse Networks//C2 Pipeline//EN\nX-PUBLISHED-TTL:PT1H\nMETHOD:PUBLISH\n";
-        eventStorage.forEach(node => {
-            const uid = btoa(node.title + node.start).substring(0, 16);
-            stream += "BEGIN:VEVENT\n";
-            stream += `UID:${uid}@xclipse.networks\n`;
-            stream += `SUMMARY:${node.title.toUpperCase()}\n`;
-            stream += `DTSTART:${timestampICS(node.start)}\n`;
-            stream += `DTEND:${timestampICS(node.end)}\n`;
-            stream += `DESCRIPTION:${node.desc.replace(/\n/g, '\\n')}\n`;
-            stream += `DTSTAMP:${timestampICS(new Date())}\n`;
-            stream += "END:VEVENT\n";
-        });
-        stream += "END:VCALENDAR";
+        mon.innerHTML = `[SYSTEM]: BROADCASTING...<br>[C2]: SENDING_LOG_PACKET<br>[GITHUB]: INJECTING_ICS`;
 
         try {
-            // 2. FETCH REMOTE HEAD SHA
-            const headRef = await fetch(`https://api.github.com/repos/${KERNEL_CFG.user}/${KERNEL_CFG.repo}/contents/${KERNEL_CFG.file}`, {
-                headers: { 'Authorization': `token ${KERNEL_CFG.key}` }
-            });
-            const headData = await headRef.json();
+            // A. Update Firebase Database (Syncs all Admin Screens)
+            await db.ref('network/pipeline_events').set(eventVault);
 
-            // 3. EXECUTE RECURSIVE PUT PUSH
-            const uplink = await fetch(`https://api.github.com/repos/${KERNEL_CFG.user}/${KERNEL_CFG.repo}/contents/${KERNEL_CFG.file}`, {
+            // B. Send Log to Admin-C2 Command Center
+            const logMsg = `>> PIPELINE_SYNC: ${eventVault.length} NODES_ACTIVE`;
+            db.ref('network/logs').push({
+                msg: logMsg,
+                color: 'pink',
+                timestamp: Date.now()
+            });
+
+            // C. Generate ICS and Push to GitHub (For Apple Calendar)
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Xclipse//EN\nX-PUBLISHED-TTL:PT1H\n";
+            eventVault.forEach(node => {
+                const uid = btoa(node.title + node.start).substring(0, 12);
+                ics += `BEGIN:VEVENT\nUID:${uid}@xclipse.net\nSUMMARY:${node.title.toUpperCase()}\nDTSTART:${timestampICS(node.start)}\nDTEND:${timestampICS(node.end)}\nDESCRIPTION:${node.desc}\nEND:VEVENT\n`;
+            });
+            ics += "END:VCALENDAR";
+
+            const fileRes = await fetch(`https://api.github.com/repos/${GITHUB_CFG.owner}/${GITHUB_CFG.repo}/contents/${GITHUB_CFG.path}`, {
+                headers: { 'Authorization': `token ${GITHUB_CFG.token}` }
+            });
+            const fileData = await fileRes.json();
+
+            await fetch(`https://api.github.com/repos/${GITHUB_CFG.owner}/${GITHUB_CFG.repo}/contents/${GITHUB_CFG.path}`, {
                 method: 'PUT',
-                headers: { 'Authorization': `token ${KERNEL_CFG.key}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `token ${GITHUB_CFG.token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: `C2_UPLINK: ${new Date().toISOString()}`,
-                    content: btoa(unescape(encodeURIComponent(stream))), // Safe Base64 encoding
-                    sha: headData.sha
+                    message: "C2_SYSTEM_AUTO_SYNC",
+                    content: btoa(unescape(encodeURIComponent(ics))),
+                    sha: fileData.sha
                 })
             });
 
-            if (uplink.ok) {
-                mon.innerHTML = `[SYSTEM]: STREAM_COMPLETE<br>[NET]: ASYNC_SUCCESS<br>[NODE]: ${eventStorage.length} ACTIVE`;
-                mon.style.borderLeftColor = "var(--success)";
-            } else {
-                throw new Error("UPLINK_REJECTED");
-            }
-        } catch (f) {
-            mon.innerHTML = `[SYSTEM]: FATAL_ERROR<br>[NET]: AUTH_FAILURE_OR_SHA_MISS<br>[ERR]: ${f.message}`;
-            mon.style.borderLeftColor = "var(--accent1)";
-        } finally {
-            btn.classList.remove('syncing');
-            btn.disabled = false;
+            mon.innerHTML = `[SYSTEM]: UPLINK_SUCCESS<br>[NET]: ALL_NODES_SYNCHRONIZED`;
+        } catch (err) {
+            mon.innerHTML = `[SYSTEM]: SYNC_ERROR<br>[ERR]: ${err.message}`;
         }
     }
 
-    /**
-     * UI RENDERING KERNEL
-     */
     function renderPipeline() {
         const feed = document.getElementById('pipelineFeed');
         feed.innerHTML = "";
-
-        eventStorage.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach((node, i) => {
-            const el = document.createElement('div');
-            el.className = "event-node";
-            el.innerHTML = `
+        eventVault.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach((node, i) => {
+            const div = document.createElement('div');
+            div.className = "event-node";
+            div.innerHTML = `
                 <div class="meta">
-                    <p class="time-badge"><i class="far fa-clock mr-1"></i> ACTIVE_SEQUENCE</p>
                     <h3>${node.title}</h3>
-                    <p>${new Date(node.start).toLocaleString()} // ${new Date(node.end).toLocaleTimeString()}</p>
-                    <p style="opacity: 0.3; margin-top: 10px;">${node.desc || 'NO_METADATA'}</p>
+                    <p>${new Date(node.start).toLocaleString()} — ${new Date(node.end).toLocaleTimeString()}</p>
                 </div>
-                <button class="btn-del" onclick="purgeNode(${i})">PURGE</button>
+                <button class="btn-del" onclick="removeNode(${i})">PURGE</button>
             `;
-            feed.appendChild(el);
+            feed.appendChild(div);
         });
-        localStorage.setItem('xclipse_vault_v2', JSON.stringify(eventStorage));
     }
 
-    // EVENT HANDLERS
     document.getElementById('eventForm').onsubmit = async (e) => {
         e.preventDefault();
-        const payload = {
+        eventVault.push({
             title: document.getElementById('evTitle').value,
             start: document.getElementById('evStart').value,
             end: document.getElementById('evEnd').value,
             desc: document.getElementById('evDesc').value
-        };
-        eventStorage.push(payload);
-        renderPipeline();
-        await binaryStreamUplink();
+        });
+        await executeGlobalSync();
         e.target.reset();
     };
 
-    window.purgeNode = async (idx) => {
-        if(confirm("TERMINATE NODE PERMANENTLY?")) {
-            eventStorage.splice(idx, 1);
-            renderPipeline();
-            await binaryStreamUplink();
-        }
+    window.removeNode = async (i) => {
+        eventVault.splice(i, 1);
+        await executeGlobalSync();
     };
-
-    // INITIALIZE
-    renderPipeline();
 </script>
-
 </body>
 </html>
