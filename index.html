@@ -1,120 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>XCLIPSE | PIPELINE_C2_UPLINK</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=JetBrains+Mono:wght@200;400;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCLIPSE_C2 // PIPELINE_ULTIMATE_v4.9</title>
     
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=JetBrains+Mono:wght@200;400;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --accent1: #ec4899; --accent2: #8b5cf6; --success: #4ade80;
-            --bg-deep: #010206; --glass: rgba(255, 255, 255, 0.02);
+            --pink-prime: #ec4899;
+            --cyan-glow: #06b6d4;
+            --bg-ultra: #010206;
+            --glass-depth: rgba(255, 255, 255, 0.02);
         }
+
         body {
-            background: var(--bg-deep); color: #fff; margin: 0; padding: 0;
-            font-family: 'Poppins', sans-serif; overflow-x: hidden;
-        }
-        header {
-            background: linear-gradient(135deg, #010206 0%, #0f172a 100%);
-            padding: 50px 20px; text-align: center; border-bottom: 1px solid rgba(236, 72, 153, 0.2);
-        }
-        header h1 {
-            font-size: 2.5rem; font-weight: 900; margin: 0; letter-spacing: -1px;
-            color: white; text-transform: uppercase;
-        }
-        .pink-glow { color: var(--accent1); text-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
-        
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 380px 1fr; gap: 30px; }
-        
-        .glass-panel {
-            background: var(--glass); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background-color: var(--bg-ultra);
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            background-image: 
+                linear-gradient(rgba(236, 72, 153, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(236, 72, 153, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            overflow-x: hidden;
         }
 
-        .monitor {
-            font-family: 'JetBrains Mono', monospace; font-size: 10px;
-            background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px;
-            margin-bottom: 25px; border-left: 3px solid var(--accent1); color: #888;
+        /* SUFFOCATED ANIMATIONS */
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: 0%; } }
+        .scanline { position: fixed; width: 100%; height: 2px; background: rgba(236, 72, 153, 0.1); z-index: 99; pointer-events: none; animation: scanline 8s linear infinite; }
+
+        .glass-heavy {
+            background: rgba(2, 4, 15, 0.8);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            backdrop-filter: blur(25px);
+            box-shadow: 0 0 40px rgba(0,0,0,1), inset 0 0 20px rgba(236, 72, 153, 0.05);
         }
 
-        input, textarea {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; padding: 15px; color: white; margin-bottom: 15px;
-            font-family: 'JetBrains Mono', monospace; outline: none;
-        }
-        input:focus { border-color: var(--accent1); }
+        .terminal-text { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .pink-neon { color: var(--pink-prime); text-shadow: 0 0 10px rgba(236, 72, 153, 0.8); }
 
-        .btn-sync {
-            background: var(--accent1); width: 100%; padding: 18px; border: none; 
-            border-radius: 10px; color: #fff; font-weight: 900; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s; letter-spacing: 2px; font-size: 11px;
+        /* INPUT OVERRIDE */
+        .c2-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px;
+            font-size: 12px;
+            color: #fff;
+            transition: 0.3s;
+            border-radius: 0;
         }
-        .btn-sync:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .c2-input:focus { border-color: var(--pink-prime); box-shadow: 0 0 15px rgba(236, 72, 153, 0.2); outline: none; }
 
-        .event-node {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-            padding: 25px; border-radius: 15px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
+        .btn-execute {
+            background: var(--pink-prime);
+            color: white;
+            font-weight: 800;
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 11px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
-        .meta h3 { margin: 0; font-size: 1.1rem; color: var(--accent1); }
-        .meta p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.5; }
-        
-        .btn-del {
-            background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444;
-            color: #ef4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 10px;
-        }
+        .btn-execute::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: 0.5s; }
+        .btn-execute:hover::after { left: 100%; }
 
-        .sub-link {
-            grid-column: span 2; background: rgba(0,0,0,0.3); padding: 15px;
-            border-radius: 10px; text-align: center; font-size: 10px; font-family: 'JetBrains Mono';
-            border: 1px solid rgba(255,255,255,0.05); color: #555;
+        .node-card {
+            border-left: 4px solid var(--pink-prime);
+            background: linear-gradient(90deg, rgba(236, 72, 153, 0.05), transparent);
+            margin-bottom: 20px;
+            padding: 25px;
+            transition: 0.3s;
         }
+        .node-card:hover { transform: translateX(10px); background: rgba(236, 72, 153, 0.1); }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-12">
 
-<header>
-    <h1>XCLIPSE <span class="pink-glow">PIPELINE</span></h1>
-    <p style="font-size: 9px; opacity: 0.4; letter-spacing: 4px; margin-top: 10px;">C2_INTEGRATED_NETWORK_V4.7</p>
+<div class="scanline"></div>
+
+<header class="max-w-7xl mx-auto mb-16 relative">
+    <div class="flex justify-between items-end border-b border-pink-500/20 pb-8">
+        <div>
+            <p class="terminal-text text-pink-500/50 mb-2">SYSTEM_ID: XCLIPSE_PIPELINE_C2</p>
+            <h1 class="font-display text-4xl italic tracking-tighter">UPLINK_<span class="pink-neon">PROTOCOL</span></h1>
+        </div>
+        <div class="text-right hidden md:block">
+            <p id="net-status" class="terminal-text text-cyan-400">● NETWORK_STABLE</p>
+            <p class="text-[9px] opacity-30 mt-1">ENCRYPTION: AES_256_GCM</p>
+        </div>
+    </div>
 </header>
 
-<div class="container">
-    <div class="sidebar">
-        <div class="glass-panel">
-            <div class="monitor" id="sys-monitor">
-                [SYSTEM]: KERNEL_IDLE<br>
-                [UPLINK]: READY_TO_BROADCAST<br>
-                [DATABASE]: CONNECTED_TO_SECURITY_NODE
-            </div>
-
-            <form id="eventForm">
-                <input type="text" id="evTitle" placeholder="NODE_TITLE" required>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <input type="datetime-local" id="evStart" required>
-                    <input type="datetime-local" id="evEnd" required>
+<main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+    
+    <div class="lg:col-span-4 space-y-8">
+        <div class="glass-heavy p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-2 text-[8px] opacity-20">INPUT_MODULE_01</div>
+            
+            <h3 class="terminal-text text-pink-500 font-bold mb-8 italic tracking-widest">>> CREATE_NEW_NODE</h3>
+            
+            <form id="ultraForm" class="space-y-6">
+                <div>
+                    <label class="text-[9px] opacity-40 block mb-2">SEQUENCE_IDENTIFIER</label>
+                    <input type="text" id="nodeTitle" placeholder="NODE_NAME" class="w-full c2-input" required>
                 </div>
-                <textarea id="evDesc" placeholder="NODE_SPECIFICATIONS..." rows="4"></textarea>
-                <button type="submit" id="syncBtn" class="btn-sync">Execute Master Push</button>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] opacity-40 block mb-2">INIT_TIME</label>
+                        <input type="datetime-local" id="nodeStart" class="w-full c2-input" required>
+                    </div>
+                    <div>
+                        <label class="text-[9px] opacity-40 block mb-2">TERM_TIME</label>
+                        <input type="datetime-local" id="nodeEnd" class="w-full c2-input" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[9px] opacity-40 block mb-2">METADATA_STREAM</label>
+                    <textarea id="nodeDesc" rows="4" placeholder="PROTOCOL_INSTRUCTIONS..." class="w-full c2-input"></textarea>
+                </div>
+
+                <button type="submit" id="masterPushBtn" class="w-full btn-execute">
+                    Authorize Uplink
+                </button>
             </form>
         </div>
+
+        <div class="glass-heavy p-6">
+            <h3 class="terminal-text text-[9px] opacity-50 mb-4 tracking-[0.3em]">SYSTEM_DIAGNOSTICS</h3>
+            <div id="diag-log" class="text-[9px] space-y-2 font-mono text-cyan-500/80 overflow-y-auto h-32">
+                > KERNEL_LOADED...<br>
+                > DB_AUTH_SUCCESS...<br>
+                > WAITING_FOR_INPUT...
+            </div>
+        </div>
     </div>
 
-    <div class="pipeline-feed" id="pipelineFeed">
+    <div class="lg:col-span-8">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="terminal-text font-bold text-lg italic tracking-[0.5em]">LIVE_PIPELINE_FEED</h2>
+            <div class="text-[10px] bg-pink-500/10 px-4 py-1 border border-pink-500/20 rounded-full">
+                ACTIVE_NODES: <span id="node-count">0</span>
+            </div>
         </div>
 
-    <div class="sub-link">
-        SUBSCRIPTION_URL: https://raw.githubusercontent.com/eclipsenetworks/Interactive-Calendar-Manager/main/calendar.ics
+        <div id="masterFeed" class="space-y-4 h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+            </div>
+
+        <div class="mt-8 p-6 glass-heavy border-dashed border-white/10">
+            <p class="text-[9px] opacity-40 mb-2 uppercase tracking-widest">External Calendar Subscription URL (Apple/Google)</p>
+            <code id="sub-url" class="text-[10px] text-pink-500 break-all select-all cursor-pointer">
+                https://raw.githubusercontent.com/eclipsenetworks/Interactive-Calendar-Manager/main/calendar.ics
+            </code>
+        </div>
     </div>
-</div>
+</main>
 
 <script>
-    // 1. DATA SOURCE COORDINATION (Using Admin-C2 Credentials)
+    // 1. DATA CORE INITIALIZATION (Extracted from admin-c2.html)
     const firebaseConfig = {
         apiKey: "AIzaSyCdv6yESBrKhlEvU2URCXoVRVO-2OjAEv4",
         authDomain: "xclipse-security.firebaseapp.com",
@@ -128,103 +180,152 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const GITHUB_CFG = {
+    const GITHUB_GATEWAY = {
         token: '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',
         owner: 'eclipsenetworks',
         repo: 'Interactive-Calendar-Manager',
         path: 'calendar.ics'
     };
 
-    let eventVault = [];
+    let localNodeCache = [];
 
-    // 2. REAL-TIME MULTI-ADMIN LISTENER
+    // 2. DIAGNOSTIC INTERFACE
+    function addDiag(msg) {
+        const log = document.getElementById('diag-log');
+        const timestamp = new Date().toLocaleTimeString();
+        log.innerHTML += `<div>[${timestamp}] > ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // 3. MULTI-ADMIN STATE SYNC
     db.ref('network/pipeline_events').on('value', (snapshot) => {
-        const data = snapshot.val();
-        eventVault = data ? Object.values(data) : [];
-        renderPipeline();
+        const remoteData = snapshot.val();
+        localNodeCache = remoteData ? Object.values(remoteData) : [];
+        renderFeed();
+        addDiag("REMOTE_STATE_RECONCILED");
     });
 
-    const timestampICS = (d) => new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
+    const formatICS = (d) => new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
 
-    // 3. THE TRIPLE-SYNC HANDSHAKE
-    async function executeGlobalSync() {
-        const mon = document.getElementById('sys-monitor');
-        mon.innerHTML = `[SYSTEM]: BROADCASTING...<br>[C2]: SENDING_LOG_PACKET<br>[GITHUB]: INJECTING_ICS`;
+    // 4. THE ULTIMATE SYNC HANDSHAKE (Triple Broadcast)
+    async function globalBroadcast() {
+        addDiag("INITIATING_GLOBAL_BROADCAST...");
+        const pushBtn = document.getElementById('masterPushBtn');
+        pushBtn.innerText = "SYNCHRONIZING...";
+        pushBtn.disabled = true;
 
         try {
-            // A. Update Firebase Database (Syncs all Admin Screens)
-            await db.ref('network/pipeline_events').set(eventVault);
+            // A. FIREBASE REPLICATION
+            await db.ref('network/pipeline_events').set(localNodeCache);
+            addDiag("FIREBASE_MIRROR_SUCCESS");
 
-            // B. Send Log to Admin-C2 Command Center
-            const logMsg = `>> PIPELINE_SYNC: ${eventVault.length} NODES_ACTIVE`;
-            db.ref('network/logs').push({
-                msg: logMsg,
+            // B. C2 COMMAND LOGGING
+            const logEntry = {
+                msg: `>> SYSTEM_SYNC_EXECUTED: ${localNodeCache.length} PIPELINE_NODES`,
                 color: 'pink',
                 timestamp: Date.now()
-            });
+            };
+            db.ref('network/logs').push(logEntry);
+            addDiag("C2_LOG_UPLINK_COMPLETE");
 
-            // C. Generate ICS and Push to GitHub (For Apple Calendar)
-            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Xclipse//EN\nX-PUBLISHED-TTL:PT1H\n";
-            eventVault.forEach(node => {
-                const uid = btoa(node.title + node.start).substring(0, 12);
-                ics += `BEGIN:VEVENT\nUID:${uid}@xclipse.net\nSUMMARY:${node.title.toUpperCase()}\nDTSTART:${timestampICS(node.start)}\nDTEND:${timestampICS(node.end)}\nDESCRIPTION:${node.desc}\nEND:VEVENT\n`;
+            // C. GITHUB BINARY INJECTION (For Apple Calendar Subscriber)
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Xclipse Networks//Ultimate C2//EN\nX-PUBLISHED-TTL:PT1H\nMETHOD:PUBLISH\n";
+            localNodeCache.forEach(node => {
+                const uniqueId = btoa(node.title + node.start).substring(0, 16);
+                icsContent += "BEGIN:VEVENT\n";
+                icsContent += `UID:${uniqueId}@xclipse.net\n`;
+                icsContent += `SUMMARY:${node.title.toUpperCase()}\n`;
+                icsContent += `DTSTART:${formatICS(node.start)}\n`;
+                icsContent += `DTEND:${formatICS(node.end)}\n`;
+                icsContent += `DESCRIPTION:${node.desc.replace(/\n/g, '\\n')}\n`;
+                icsContent += `DTSTAMP:${formatICS(new Date())}\n`;
+                icsContent += "END:VEVENT\n";
             });
-            ics += "END:VCALENDAR";
+            icsContent += "END:VCALENDAR";
 
-            const fileRes = await fetch(`https://api.github.com/repos/${GITHUB_CFG.owner}/${GITHUB_CFG.repo}/contents/${GITHUB_CFG.path}`, {
-                headers: { 'Authorization': `token ${GITHUB_CFG.token}` }
+            const fileStatus = await fetch(`https://api.github.com/repos/${GITHUB_GATEWAY.owner}/${GITHUB_GATEWAY.repo}/contents/${GITHUB_GATEWAY.path}`, {
+                headers: { 'Authorization': `token ${GITHUB_GATEWAY.token}` }
             });
-            const fileData = await fileRes.json();
+            const currentFileData = await fileStatus.json();
 
-            await fetch(`https://api.github.com/repos/${GITHUB_CFG.owner}/${GITHUB_CFG.repo}/contents/${GITHUB_CFG.path}`, {
+            const uplinkResponse = await fetch(`https://api.github.com/repos/${GITHUB_GATEWAY.owner}/${GITHUB_GATEWAY.repo}/contents/${GITHUB_GATEWAY.path}`, {
                 method: 'PUT',
-                headers: { 'Authorization': `token ${GITHUB_CFG.token}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `token ${GITHUB_GATEWAY.token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: "C2_SYSTEM_AUTO_SYNC",
-                    content: btoa(unescape(encodeURIComponent(ics))),
-                    sha: fileData.sha
+                    message: `SYSTEM_AUTO_UPLINK_${Date.now()}`,
+                    content: btoa(unescape(encodeURIComponent(icsContent))),
+                    sha: currentFileData.sha
                 })
             });
 
-            mon.innerHTML = `[SYSTEM]: UPLINK_SUCCESS<br>[NET]: ALL_NODES_SYNCHRONIZED`;
+            if(uplinkResponse.ok) {
+                addDiag("GITHUB_UPLINK_VERIFIED");
+                document.getElementById('net-status').innerText = "● UPLINK_SUCCESSFUL";
+            }
         } catch (err) {
-            mon.innerHTML = `[SYSTEM]: SYNC_ERROR<br>[ERR]: ${err.message}`;
+            addDiag(`CRITICAL_ERROR: ${err.message}`);
+            document.getElementById('net-status').innerText = "● UPLINK_FAILURE";
+            document.getElementById('net-status').className = "terminal-text text-red-500";
+        } finally {
+            pushBtn.innerText = "Authorize Uplink";
+            pushBtn.disabled = false;
         }
     }
 
-    function renderPipeline() {
-        const feed = document.getElementById('pipelineFeed');
+    function renderFeed() {
+        const feed = document.getElementById('masterFeed');
+        const count = document.getElementById('node-count');
         feed.innerHTML = "";
-        eventVault.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach((node, i) => {
-            const div = document.createElement('div');
-            div.className = "event-node";
-            div.innerHTML = `
-                <div class="meta">
-                    <h3>${node.title}</h3>
-                    <p>${new Date(node.start).toLocaleString()} — ${new Date(node.end).toLocaleTimeString()}</p>
+        count.innerText = localNodeCache.length;
+
+        localNodeCache.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach((node, i) => {
+            const card = document.createElement('div');
+            card.className = "node-card";
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="text-pink-500 font-bold tracking-widest uppercase">${node.title}</h4>
+                        <p class="text-[10px] opacity-40 mt-1">NODE_ID: ${btoa(node.title).substring(0,8).toUpperCase()}</p>
+                        <div class="flex gap-4 mt-4 text-[9px] font-bold">
+                            <span class="text-cyan-400">INIT: ${new Date(node.start).toLocaleString()}</span>
+                            <span class="opacity-30">|</span>
+                            <span class="text-red-400">TERM: ${new Date(node.end).toLocaleTimeString()}</span>
+                        </div>
+                        <p class="text-[10px] mt-4 leading-relaxed opacity-60 italic max-w-xl">${node.desc || 'NULL_DESCRIPTION_BUFFER'}</p>
+                    </div>
+                    <button onclick="terminateNode(${i})" class="text-[9px] border border-red-500/30 text-red-500 px-4 py-2 hover:bg-red-500 hover:text-white transition uppercase font-black">Terminate</button>
                 </div>
-                <button class="btn-del" onclick="removeNode(${i})">PURGE</button>
             `;
-            feed.appendChild(div);
+            feed.appendChild(card);
         });
     }
 
-    document.getElementById('eventForm').onsubmit = async (e) => {
+    // EVENT_INPUT_TRIGGER
+    document.getElementById('ultraForm').onsubmit = async (e) => {
         e.preventDefault();
-        eventVault.push({
-            title: document.getElementById('evTitle').value,
-            start: document.getElementById('evStart').value,
-            end: document.getElementById('evEnd').value,
-            desc: document.getElementById('evDesc').value
-        });
-        await executeGlobalSync();
+        const payload = {
+            title: document.getElementById('nodeTitle').value,
+            start: document.getElementById('nodeStart').value,
+            end: document.getElementById('nodeEnd').value,
+            desc: document.getElementById('nodeDesc').value
+        };
+        localNodeCache.push(payload);
+        renderFeed();
+        await globalBroadcast();
         e.target.reset();
     };
 
-    window.removeNode = async (i) => {
-        eventVault.splice(i, 1);
-        await executeGlobalSync();
+    window.terminateNode = async (idx) => {
+        if(confirm("CONFIRM_NODE_PURGE?")) {
+            addDiag(`PURGING_NODE_INDEX_${idx}...`);
+            localNodeCache.splice(idx, 1);
+            renderFeed();
+            await globalBroadcast();
+        }
     };
+
+    renderFeed();
 </script>
+
 </body>
 </html>
