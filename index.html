@@ -2,330 +2,188 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XCLIPSE_C2 // PIPELINE_ULTIMATE_v4.9</title>
-    
+    <title>XCLIPSE_C2 // TEMPORAL_UPLINK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=JetBrains+Mono:wght@200;400;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --pink-prime: #ec4899;
-            --cyan-glow: #06b6d4;
-            --bg-ultra: #010206;
-            --glass-depth: rgba(255, 255, 255, 0.02);
-        }
-
-        body {
-            background-color: var(--bg-ultra);
-            color: #ffffff;
-            font-family: 'JetBrains Mono', monospace;
-            background-image: 
-                linear-gradient(rgba(236, 72, 153, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(236, 72, 153, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            overflow-x: hidden;
-        }
-
-        /* SUFFOCATED ANIMATIONS */
-        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: 0%; } }
-        .scanline { position: fixed; width: 100%; height: 2px; background: rgba(236, 72, 153, 0.1); z-index: 99; pointer-events: none; animation: scanline 8s linear infinite; }
-
-        .glass-heavy {
-            background: rgba(2, 4, 15, 0.8);
-            border: 1px solid rgba(236, 72, 153, 0.2);
-            backdrop-filter: blur(25px);
-            box-shadow: 0 0 40px rgba(0,0,0,1), inset 0 0 20px rgba(236, 72, 153, 0.05);
-        }
-
-        .terminal-text { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        .pink-neon { color: var(--pink-prime); text-shadow: 0 0 10px rgba(236, 72, 153, 0.8); }
-
-        /* INPUT OVERRIDE */
-        .c2-input {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 16px;
-            font-size: 12px;
-            color: #fff;
-            transition: 0.3s;
-            border-radius: 0;
-        }
-        .c2-input:focus { border-color: var(--pink-prime); box-shadow: 0 0 15px rgba(236, 72, 153, 0.2); outline: none; }
-
-        .btn-execute {
-            background: var(--pink-prime);
-            color: white;
-            font-weight: 800;
-            padding: 20px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-size: 11px;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-execute::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: 0.5s; }
-        .btn-execute:hover::after { left: 100%; }
-
-        .node-card {
-            border-left: 4px solid var(--pink-prime);
-            background: linear-gradient(90deg, rgba(236, 72, 153, 0.05), transparent);
-            margin-bottom: 20px;
-            padding: 25px;
-            transition: 0.3s;
-        }
-        .node-card:hover { transform: translateX(10px); background: rgba(236, 72, 153, 0.1); }
+        :root { --p: #ec4899; --bg: #010206; }
+        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; overflow: hidden; }
+        .glass { background: rgba(255,255,255,0.01); border: 1px solid rgba(236,72,153,0.1); backdrop-filter: blur(20px); }
+        .neon-text { color: var(--p); text-shadow: 0 0 15px var(--p); }
+        
+        /* 1S PULSE ANIMATION */
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
+        .pulse-core { width: 10px; height: 10px; background: var(--p); border-radius: 50%; position: relative; }
+        .pulse-ring { position: absolute; width: 100%; height: 100%; border: 2px solid var(--p); border-radius: 50%; animation: pulse-ring 1s infinite; }
+        
+        input, textarea { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; font-size: 10px; }
+        .custom-scroll::-webkit-scrollbar { width: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--p); }
     </style>
 </head>
-<body class="p-4 md:p-12">
+<body class="p-6">
 
-<div class="scanline"></div>
-
-<header class="max-w-7xl mx-auto mb-16 relative">
-    <div class="flex justify-between items-end border-b border-pink-500/20 pb-8">
-        <div>
-            <p class="terminal-text text-pink-500/50 mb-2">SYSTEM_ID: XCLIPSE_PIPELINE_C2</p>
-            <h1 class="font-display text-4xl italic tracking-tighter">UPLINK_<span class="pink-neon">PROTOCOL</span></h1>
-        </div>
-        <div class="text-right hidden md:block">
-            <p id="net-status" class="terminal-text text-cyan-400">● NETWORK_STABLE</p>
-            <p class="text-[9px] opacity-30 mt-1">ENCRYPTION: AES_256_GCM</p>
-        </div>
-    </div>
-</header>
-
-<main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
-    
-    <div class="lg:col-span-4 space-y-8">
-        <div class="glass-heavy p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-2 text-[8px] opacity-20">INPUT_MODULE_01</div>
-            
-            <h3 class="terminal-text text-pink-500 font-bold mb-8 italic tracking-widest">>> CREATE_NEW_NODE</h3>
-            
-            <form id="ultraForm" class="space-y-6">
+    <div class="max-w-7xl mx-auto h-screen flex flex-col">
+        <header class="flex justify-between items-center border-b border-white/5 pb-6 mb-8">
+            <div class="flex items-center gap-6">
+                <div class="pulse-core"><div class="pulse-ring"></div></div>
                 <div>
-                    <label class="text-[9px] opacity-40 block mb-2">SEQUENCE_IDENTIFIER</label>
-                    <input type="text" id="nodeTitle" placeholder="NODE_NAME" class="w-full c2-input" required>
+                    <h1 class="text-2xl font-black italic tracking-tighter">UPLINK_<span class="neon-text">TEMPORAL</span></h1>
+                    <p class="text-[8px] opacity-30 uppercase tracking-[0.4em]">Freq: 1000ms // Protocol: ICS_BINARY_STREAM</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[9px] opacity-40 block mb-2">INIT_TIME</label>
-                        <input type="datetime-local" id="nodeStart" class="w-full c2-input" required>
-                    </div>
-                    <div>
-                        <label class="text-[9px] opacity-40 block mb-2">TERM_TIME</label>
-                        <input type="datetime-local" id="nodeEnd" class="w-full c2-input" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-[9px] opacity-40 block mb-2">METADATA_STREAM</label>
-                    <textarea id="nodeDesc" rows="4" placeholder="PROTOCOL_INSTRUCTIONS..." class="w-full c2-input"></textarea>
-                </div>
-
-                <button type="submit" id="masterPushBtn" class="w-full btn-execute">
-                    Authorize Uplink
-                </button>
-            </form>
-        </div>
-
-        <div class="glass-heavy p-6">
-            <h3 class="terminal-text text-[9px] opacity-50 mb-4 tracking-[0.3em]">SYSTEM_DIAGNOSTICS</h3>
-            <div id="diag-log" class="text-[9px] space-y-2 font-mono text-cyan-500/80 overflow-y-auto h-32">
-                > KERNEL_LOADED...<br>
-                > DB_AUTH_SUCCESS...<br>
-                > WAITING_FOR_INPUT...
             </div>
-        </div>
-    </div>
+            <div id="sync-timer" class="text-right font-black text-xl opacity-20">00:00:00</div>
+        </header>
 
-    <div class="lg:col-span-8">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="terminal-text font-bold text-lg italic tracking-[0.5em]">LIVE_PIPELINE_FEED</h2>
-            <div class="text-[10px] bg-pink-500/10 px-4 py-1 border border-pink-500/20 rounded-full">
-                ACTIVE_NODES: <span id="node-count">0</span>
-            </div>
-        </div>
-
-        <div id="masterFeed" class="space-y-4 h-[600px] overflow-y-auto pr-4 custom-scrollbar">
-            </div>
-
-        <div class="mt-8 p-6 glass-heavy border-dashed border-white/10">
-            <p class="text-[9px] opacity-40 mb-2 uppercase tracking-widest">External Calendar Subscription URL (Apple/Google)</p>
-            <code id="sub-url" class="text-[10px] text-pink-500 break-all select-all cursor-pointer">
-                https://raw.githubusercontent.com/eclipsenetworks/Interactive-Calendar-Manager/main/calendar.ics
-            </code>
-        </div>
-    </div>
-</main>
-
-<script>
-    // 1. DATA CORE INITIALIZATION (Extracted from admin-c2.html)
-    const firebaseConfig = {
-        apiKey: "AIzaSyCdv6yESBrKhlEvU2URCXoVRVO-2OjAEv4",
-        authDomain: "xclipse-security.firebaseapp.com",
-        databaseURL: "https://xclipse-security-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "xclipse-security",
-        storageBucket: "xclipse-security.firebasestorage.app",
-        messagingSenderId: "161353959200",
-        appId: "1:161353959200:web:d0b36f7817b31842cff945"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const GITHUB_GATEWAY = {
-        token: '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',
-        owner: 'eclipsenetworks',
-        repo: 'Interactive-Calendar-Manager',
-        path: 'calendar.ics'
-    };
-
-    let localNodeCache = [];
-
-    // 2. DIAGNOSTIC INTERFACE
-    function addDiag(msg) {
-        const log = document.getElementById('diag-log');
-        const timestamp = new Date().toLocaleTimeString();
-        log.innerHTML += `<div>[${timestamp}] > ${msg}</div>`;
-        log.scrollTop = log.scrollHeight;
-    }
-
-    // 3. MULTI-ADMIN STATE SYNC
-    db.ref('network/pipeline_events').on('value', (snapshot) => {
-        const remoteData = snapshot.val();
-        localNodeCache = remoteData ? Object.values(remoteData) : [];
-        renderFeed();
-        addDiag("REMOTE_STATE_RECONCILED");
-    });
-
-    const formatICS = (d) => new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + "Z";
-
-    // 4. THE ULTIMATE SYNC HANDSHAKE (Triple Broadcast)
-    async function globalBroadcast() {
-        addDiag("INITIATING_GLOBAL_BROADCAST...");
-        const pushBtn = document.getElementById('masterPushBtn');
-        pushBtn.innerText = "SYNCHRONIZING...";
-        pushBtn.disabled = true;
-
-        try {
-            // A. FIREBASE REPLICATION
-            await db.ref('network/pipeline_events').set(localNodeCache);
-            addDiag("FIREBASE_MIRROR_SUCCESS");
-
-            // B. C2 COMMAND LOGGING
-            const logEntry = {
-                msg: `>> SYSTEM_SYNC_EXECUTED: ${localNodeCache.length} PIPELINE_NODES`,
-                color: 'pink',
-                timestamp: Date.now()
-            };
-            db.ref('network/logs').push(logEntry);
-            addDiag("C2_LOG_UPLINK_COMPLETE");
-
-            // C. GITHUB BINARY INJECTION (For Apple Calendar Subscriber)
-            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Xclipse Networks//Ultimate C2//EN\nX-PUBLISHED-TTL:PT1H\nMETHOD:PUBLISH\n";
-            localNodeCache.forEach(node => {
-                const uniqueId = btoa(node.title + node.start).substring(0, 16);
-                icsContent += "BEGIN:VEVENT\n";
-                icsContent += `UID:${uniqueId}@xclipse.net\n`;
-                icsContent += `SUMMARY:${node.title.toUpperCase()}\n`;
-                icsContent += `DTSTART:${formatICS(node.start)}\n`;
-                icsContent += `DTEND:${formatICS(node.end)}\n`;
-                icsContent += `DESCRIPTION:${node.desc.replace(/\n/g, '\\n')}\n`;
-                icsContent += `DTSTAMP:${formatICS(new Date())}\n`;
-                icsContent += "END:VEVENT\n";
-            });
-            icsContent += "END:VCALENDAR";
-
-            const fileStatus = await fetch(`https://api.github.com/repos/${GITHUB_GATEWAY.owner}/${GITHUB_GATEWAY.repo}/contents/${GITHUB_GATEWAY.path}`, {
-                headers: { 'Authorization': `token ${GITHUB_GATEWAY.token}` }
-            });
-            const currentFileData = await fileStatus.json();
-
-            const uplinkResponse = await fetch(`https://api.github.com/repos/${GITHUB_GATEWAY.owner}/${GITHUB_GATEWAY.repo}/contents/${GITHUB_GATEWAY.path}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${GITHUB_GATEWAY.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `SYSTEM_AUTO_UPLINK_${Date.now()}`,
-                    content: btoa(unescape(encodeURIComponent(icsContent))),
-                    sha: currentFileData.sha
-                })
-            });
-
-            if(uplinkResponse.ok) {
-                addDiag("GITHUB_UPLINK_VERIFIED");
-                document.getElementById('net-status').innerText = "● UPLINK_SUCCESSFUL";
-            }
-        } catch (err) {
-            addDiag(`CRITICAL_ERROR: ${err.message}`);
-            document.getElementById('net-status').innerText = "● UPLINK_FAILURE";
-            document.getElementById('net-status').className = "terminal-text text-red-500";
-        } finally {
-            pushBtn.innerText = "Authorize Uplink";
-            pushBtn.disabled = false;
-        }
-    }
-
-    function renderFeed() {
-        const feed = document.getElementById('masterFeed');
-        const count = document.getElementById('node-count');
-        feed.innerHTML = "";
-        count.innerText = localNodeCache.length;
-
-        localNodeCache.sort((a,b) => new Date(a.start) - new Date(b.start)).forEach((node, i) => {
-            const card = document.createElement('div');
-            card.className = "node-card";
-            card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="text-pink-500 font-bold tracking-widest uppercase">${node.title}</h4>
-                        <p class="text-[10px] opacity-40 mt-1">NODE_ID: ${btoa(node.title).substring(0,8).toUpperCase()}</p>
-                        <div class="flex gap-4 mt-4 text-[9px] font-bold">
-                            <span class="text-cyan-400">INIT: ${new Date(node.start).toLocaleString()}</span>
-                            <span class="opacity-30">|</span>
-                            <span class="text-red-400">TERM: ${new Date(node.end).toLocaleTimeString()}</span>
+        <div class="grid grid-cols-12 gap-8 flex-grow overflow-hidden">
+            <div class="col-span-4 space-y-4">
+                <div class="glass p-6 rounded-3xl">
+                    <p class="text-[9px] text-pink-500 font-bold mb-4 uppercase">>> Append_Pipeline_Node</p>
+                    <form id="icsForm" class="space-y-3">
+                        <input type="text" id="title" placeholder="SUMMARY (e.g. Adelaide)" class="w-full p-4 outline-none" required>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" id="start" class="p-4" required>
+                            <input type="date" id="end" class="p-4" required>
                         </div>
-                        <p class="text-[10px] mt-4 leading-relaxed opacity-60 italic max-w-xl">${node.desc || 'NULL_DESCRIPTION_BUFFER'}</p>
-                    </div>
-                    <button onclick="terminateNode(${i})" class="text-[9px] border border-red-500/30 text-red-500 px-4 py-2 hover:bg-red-500 hover:text-white transition uppercase font-black">Terminate</button>
+                        <textarea id="desc" placeholder="DESCRIPTION (e.g. Deployment Info)" class="w-full p-4 h-24 outline-none"></textarea>
+                        <button type="submit" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-4 text-[10px] uppercase tracking-widest transition-all">Execute Push</button>
+                    </form>
                 </div>
-            `;
-            feed.appendChild(card);
-        });
-    }
+                
+                <div class="glass p-4 rounded-2xl text-[9px] opacity-40 leading-relaxed font-mono">
+                    [REF]: calendar.xclipsenetworks.com/calendar.ics<br>
+                    [TTL]: 3600S (Requesting 1S Override)<br>
+                    [SHA]: <span id="sha-val">PENDING...</span>
+                </div>
+            </div>
 
-    // EVENT_INPUT_TRIGGER
-    document.getElementById('ultraForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const payload = {
-            title: document.getElementById('nodeTitle').value,
-            start: document.getElementById('nodeStart').value,
-            end: document.getElementById('nodeEnd').value,
-            desc: document.getElementById('nodeDesc').value
+            <div class="col-span-8 flex flex-col h-full">
+                <div id="nodeFeed" class="space-y-2 overflow-y-auto pr-4 custom-scroll flex-grow">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE ENCRYPTION NODES
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdv6yESBrKhlEvU2URCXoVRVO-2OjAEv4",
+            authDomain: "xclipse-security.firebaseapp.com",
+            databaseURL: "https://xclipse-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "xclipse-security",
+            storageBucket: "xclipse-security.firebasestorage.app",
+            messagingSenderId: "161353959200",
+            appId: "1:161353959200:web:d0b36f7817b31842cff945"
         };
-        localNodeCache.push(payload);
-        renderFeed();
-        await globalBroadcast();
-        e.target.reset();
-    };
 
-    window.terminateNode = async (idx) => {
-        if(confirm("CONFIRM_NODE_PURGE?")) {
-            addDiag(`PURGING_NODE_INDEX_${idx}...`);
-            localNodeCache.splice(idx, 1);
-            renderFeed();
-            await globalBroadcast();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const GITHUB = {
+            token: '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',
+            owner: 'eclipsenetworks',
+            repo: 'Interactive-Calendar-Manager',
+            path: 'calendar.ics'
+        };
+
+        let activeNodes = [];
+        let globalPulse = 0;
+
+        // 1. RECURSIVE TEMPORAL PULSE (1-Second Logic)
+        setInterval(() => {
+            globalPulse++;
+            const now = new Date();
+            document.getElementById('sync-timer').innerText = now.toLocaleTimeString();
+            
+            // Every second, we signal to Firebase that this admin is active
+            if(globalPulse % 5 === 0) { 
+                db.ref('network/status/pipeline_last_pulse').set(Date.now());
+            }
+        }, 1000);
+
+        // 2. REAL-TIME DATA ARCHITECTURE
+        db.ref('network/pipeline_events').on('value', (snap) => {
+            const data = snap.val();
+            activeNodes = data ? Object.values(data) : [];
+            renderNodes();
+            pushToGitHub(); // Update the .ics file instantly when data changes
+        });
+
+        const cleanDate = (d) => d.replaceAll('-', '');
+
+        // 3. SUFFOCATED ICS GENERATION ENGINE
+        async function pushToGitHub() {
+            let ics = `BEGIN:VCALENDAR\nPRODID:-//Xclipse//C2//EN\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\nX-WR-CALNAME:XCLIPSE_PIPELINE\nX-WR-TIMEZONE:UTC\nX-PUBLISHED-TTL:PT1H\n`;
+            
+            activeNodes.forEach(n => {
+                const uid = btoa(n.title + n.start).substring(0, 10);
+                ics += `BEGIN:VEVENT\n`;
+                ics += `UID:${uid}@xclipsenetworks\n`;
+                ics += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+                ics += `DTSTART;VALUE=DATE:${cleanDate(n.start)}\n`;
+                ics += `DTEND;VALUE=DATE:${cleanDate(n.end)}\n`;
+                ics += `SUMMARY:${n.title}\n`;
+                ics += `DESCRIPTION:${n.desc}\n`;
+                ics += `STATUS:CONFIRMED\n`;
+                ics += `CATEGORIES:Deployment\n`;
+                ics += `END:VEVENT\n`;
+            });
+            ics += `END:VCALENDAR`;
+
+            try {
+                // Get current SHA
+                const fileRef = await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
+                    headers: { 'Authorization': `token ${GITHUB.token}` }
+                });
+                const fileData = await fileRef.json();
+                document.getElementById('sha-val').innerText = fileData.sha.substring(0, 12);
+
+                // Push Update
+                await fetch(`https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${GITHUB.path}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${GITHUB.token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: `TEMPORAL_PULSE_${Date.now()}`,
+                        content: btoa(unescape(encodeURIComponent(ics))),
+                        sha: fileData.sha
+                    })
+                });
+            } catch (e) { console.error("UPLINK_BLOCKED", e); }
         }
-    };
 
-    renderFeed();
-</script>
+        function renderNodes() {
+            const feed = document.getElementById('nodeFeed');
+            feed.innerHTML = activeNodes.map((n, i) => `
+                <div class="glass p-5 rounded-2xl flex justify-between items-center border-l-2 border-pink-500 animate-pulse-once">
+                    <div>
+                        <h4 class="text-xs font-black pink-neon uppercase">${n.title}</h4>
+                        <p class="text-[8px] opacity-40 mt-1">${n.start} >> ${n.end}</p>
+                    </div>
+                    <button onclick="purge(${i})" class="text-[8px] bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2 hover:bg-red-500 hover:text-white transition">TERMINATE</button>
+                </div>
+            `).join('');
+        }
 
+        document.getElementById('icsForm').onsubmit = (e) => {
+            e.preventDefault();
+            const node = {
+                title: document.getElementById('title').value,
+                start: document.getElementById('start').value,
+                end: document.getElementById('end').value,
+                desc: document.getElementById('desc').value
+            };
+            activeNodes.push(node);
+            db.ref('network/pipeline_events').set(activeNodes);
+            db.ref('network/logs').push({ msg: `>> UPLINK: NODE_${node.title}_INJECTED`, color: 'pink', timestamp: Date.now() });
+            e.target.reset();
+        };
+
+        window.purge = (i) => {
+            activeNodes.splice(i, 1);
+            db.ref('network/pipeline_events').set(activeNodes);
+        };
+    </script>
 </body>
 </html>
